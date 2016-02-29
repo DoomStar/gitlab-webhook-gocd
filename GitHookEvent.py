@@ -3,7 +3,7 @@
 from BaseHTTPServer import BaseHTTPRequestHandler
 
 class WebhookRequestHandler(BaseHTTPRequestHandler):
-     """Extends the BaseHTTPRequestHandler class and handles the incoming HTTP requests."""
+    """Extends the BaseHTTPRequestHandler class and handles the incoming HTTP requests."""
 
     def do_POST(self):
         # Extract repository URL(s) from incoming request body
