@@ -72,7 +72,7 @@ class GitHookEvent(object):
     @staticmethod
     def process_request(params):
         import urlparse
-        url = urlparse.urlparse(params.path)
+        url = urlparse.urlparse(params['path'])
         param = urlparse.parse_qs(url.query)
 
         if 'gocd_profile' in param.keys():
