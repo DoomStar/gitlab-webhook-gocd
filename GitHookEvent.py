@@ -109,7 +109,7 @@ class GitHookEvent(object):
         #    auth=(gocd['user'], gocd['pass'])
         #)
 
-        print req['sha']+"TAG:" +req['tag']+" Pipeline: "+param['pipeline'][0]
+        print "sha: "+req['sha']+' TAG: "' +req['tag']+'" Pipeline: '+param['pipeline'][0]
 
     def get_default_config_path(selfs):
         return './githookevent.conf.json'
