@@ -1,8 +1,12 @@
-**Git Hook Event**
+***Git Hook Event***
 
 Listens for http requests from GitLab and passes it to GO.CD.
+Currently processes only 'Tag push events' from GitLab.
 
-*Add a web hook into gitlab.*
+**Usage**
+Add environment variable 'GIT_TAG' to pipeline. This variable will be set automaticly with name of TAG.
+
+*Add a TAG web hook into gitlab.*
 Parameters
 - pipeline: pipeline name
 - material: material name, equals to git url by default - you should change it to simple string in pipeline settings
@@ -14,8 +18,7 @@ http://buildsrv.nct:8001/tag/?pipeline=test&material=git_test&gocd_profile=profi
 example2:
 http://buildsrv.nct:8001/tag/?pipeline=test&material=git_test&gocd_user=all&gocd_pass=all&gocd_host=buildsrv.nct&gocd_port=8153
 
-*INSTALLING*
-
+**INSTALLING**
 cd /opt
 git clone https://gitlab.nct/System/Git_Hook_Event.git
 cd Git_Hook_Event
