@@ -17,11 +17,15 @@ class WebhookRequestHandler(BaseHTTPRequestHandler):
         print "git_comit: "
         pprint.pprint(git_commit)
 
+    def do_GET(self):
+        pprint(self)
+
     def parse_gitlab_request(self):
         """Parses the incoming request and extracts all possible URLs to the repository in question. Since repos can
         have both ssh://, git:// and https:// URIs, and we don't know which of them is specified in the config, we need
         to collect and compare them all."""
         import json
+        import urlparse
 
         content_type = self.headers.getheader('content-type')
         length = int(self.headers.getheader('content-length'))
@@ -36,10 +40,15 @@ class WebhookRequestHandler(BaseHTTPRequestHandler):
 
             print "Received '%s' event from GitLab" % gitlab_event
 
+            gitlab = {
+                'sha': data[checkout_sha],
+                'tag': data['ref'].split('/',3)[2]
+            }
+
         else:
             print "ERROR - Unable to recognize request origin. Don't know how to handle the request."
 
-        return data
+        return gitlab
 
 class GitHookEvent(object):
     config_path = None
