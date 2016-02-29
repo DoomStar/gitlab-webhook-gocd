@@ -64,7 +64,8 @@ class GitHookEvent(object):
     @staticmethod
     def process_request(req):
         import urlparse
-        import requests
+        import urllib
+        import urllib2
 
         gocd_profiles = GitHookEvent().get_config()[ 'gocd_profiles' ]
 
@@ -88,11 +89,24 @@ class GitHookEvent(object):
             print "Error: gocd profile not defined"
             return
 
-        requests.post(
+        request = urllib2.Request(
             gocd['url']+"/go/api/pipelines/"+param['pipeline'][0]+"/schedule",
-            data={"materials["+param['material'][0]+"]": req['sha'], 'variables[GIT_TAG]': req['tag']},
-            auth=(gocd['user'], gocd['pass'])
+            urllib.urlencode(
+                {
+                    "materials["+param['material'][0]+"]": req['sha'],
+                    'variables[GIT_TAG]': req['tag']
+                }
+            ),
+            {"Authorization": "Basic " + base64.encodestring(gocd['user']+":"+gocd['pass']).replace('\n', '')}
         )
+
+        #import requests
+        #requests.post(
+        #    gocd['url']+"/go/api/pipelines/"+param['pipeline'][0]+"/schedule",
+        #    data={"materials["+param['material'][0]+"]": req['sha'], 'variables[GIT_TAG]': req['tag']},
+        #    auth=(gocd['user'], gocd['pass'])
+        #)
+
         print req['sha']+"TAG:" +req['tag']+" Pipeline: "+param['pipeline'][0]
 
     def get_default_config_path(selfs):
