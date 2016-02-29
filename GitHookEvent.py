@@ -5,51 +5,39 @@ from BaseHTTPServer import BaseHTTPRequestHandler
 class WebhookRequestHandler(BaseHTTPRequestHandler):
      """Extends the BaseHTTPRequestHandler class and handles the incoming HTTP requests."""
 
-     def do_POST(self):
-          # Extract repository URL(s) from incoming request body
-          git_commit = self.parse_gitlab_request()
+    def do_POST(self):
+        # Extract repository URL(s) from incoming request body
+        git_commit = self.parse_gitlab_request()
 
-          self.send_response(200)
-          self.send_header('Content-type', 'text/plain')
-          self.end_headers()
+        self.send_response(200)
+        self.send_header('Content-type', 'text/plain')
+        self.end_headers()
 
-          # Wait one second before we do git pull (why?)
-          Timer(1.0, GitHookEvent.process_repo_urls, [repo_urls]).start()
+        print "git_comit: "+git_commit
 
-     def parse_gitlab_request(self):
-          """Parses the incoming request and extracts all possible URLs to the repository in question. Since repos can
-          have both ssh://, git:// and https:// URIs, and we don't know which of them is specified in the config, we need
-          to collect and compare them all."""
-          import json
+    def parse_gitlab_request(self):
+        """Parses the incoming request and extracts all possible URLs to the repository in question. Since repos can
+        have both ssh://, git:// and https:// URIs, and we don't know which of them is specified in the config, we need
+        to collect and compare them all."""
+        import json
 
-          content_type = self.headers.getheader('content-type')
-          length = int(self.headers.getheader('content-length'))
-          body = self.rfile.read(length)
+        content_type = self.headers.getheader('content-type')
+        length = int(self.headers.getheader('content-length'))
+        body = self.rfile.read(length)
 
-          data = json.loads(body)
+        data = json.loads(body)
 
-          repo_urls = []
+        gitlab_event = self.headers.getheader('X-Gitlab-Event')
 
-          gitlab_event = self.headers.getheader('X-Gitlab-Event')
+        # Assume GitLab if the X-Gitlab-Event HTTP header is set
+        if gitlab_event:
 
-          # Assume GitLab if the X-Gitlab-Event HTTP header is set
-          if gitlab_event:
+            print "Received '%s' event from GitLab" % gitlab_event
 
-               print "Received '%s' event from GitLab" % gitlab_event
+        else:
+            print "ERROR - Unable to recognize request origin. Don't know how to handle the request."
 
-               if not 'repository' in data:
-                    print "ERROR - Unable to recognize data format"
-                    return repo_urls
-
-               # One repository may posses multiple URLs for different protocols
-               for k in ['url', 'git_http_url', 'git_ssh_url']:
-                    if k in data['repository']:
-                         repo_urls.append(data['repository'][k])
-
-          else:
-               print "ERROR - Unable to recognize request origin. Don't know how to handle the request."
-
-          return repo_urls
+        return data
 
 class GitHookEvent(object):
     config_path = None
@@ -96,37 +84,6 @@ class GitHookEvent(object):
         # Translate any ~ in the path into /home/<user>
         if 'pidfilepath' in self._config:
             self._config['pidfilepath'] = os.path.expanduser(self._config['pidfilepath'])
-
-        for repo_config in self._config['repositories']:
-
-            # If a Bitbucket repository is configured using the https:// URL, a username is usually
-            # specified in the beginning of the URL. To be able to compare configured Bitbucket
-            # repositories with incoming web hook events, this username needs to be stripped away in a
-            # copy of the URL.
-            if 'url' in repo_config and not 'bitbucket_username' in repo_config:
-                regexp = re.search(r"^(https?://)([^@]+)@(bitbucket\.org/)(.+)$", repo_config['url'])
-                if regexp:
-                    repo_config['url_without_usernme'] = regexp.group(1) + regexp.group(3) + regexp.group(4)
-
-            # Translate any ~ in the path into /home/<user>
-            if 'path' in repo_config:
-                repo_config['path'] = os.path.expanduser(repo_config['path'])
-
-            if not os.path.isdir(repo_config['path']):
-
-                print "Directory %s not found" % repo_config['path']
-                GitWrapper.clone(url=repo_config['url'], branch=repo_config['branch'] if 'branch' in repo_config else None, path=repo_config['path'])
-
-                if not os.path.isdir(repo_config['path']):
-                    print "Unable to clone %s branch of repository %s" % (repo_config['branch'] if 'branch' in repo_config else "default", repo_config['url'])
-                    sys.exit(2)
-
-                else:
-                    print "Repository %s successfully cloned" % repo_config['url']
-
-            if not os.path.isdir(repo_config['path'] + '/.git'):
-                print "Directory %s is not a Git repository" % repo_config['path']
-                sys.exit(2)
 
         return self._config
 
@@ -202,6 +159,7 @@ class GitHookEvent(object):
 
         with open(self.get_config()['pidfilepath'], 'w') as f:
             f.write(str(os.getpid()))
+
     def read_pid_file(self):
         with open(self.get_config()['pidfilepath'], 'r') as f:
             return f.readlines()
@@ -307,11 +265,6 @@ class GitHookEvent(object):
         # Suppress output
         if '-q' in argv or '--quiet' in argv:
             sys.stdout = open(os.devnull, 'w')
-
-        # Clear any existing lock files, with no regard to possible ongoing processes
-        for repo_config in self.get_config()['repositories']:
-            Lock(os.path.join(repo_config['path'], 'status_running')).clear()
-            Lock(os.path.join(repo_config['path'], 'status_waiting')).clear()
 
         try:
             self._server = HTTPServer((self.get_config()['host'], self.get_config()['port']), WebhookRequestHandler)
