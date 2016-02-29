@@ -69,13 +69,14 @@ class GitHookEvent(object):
                 cls, *args, **kwargs)
         return cls._instance
 
-    def process_request(self,params):
+    @staticmethod
+    def process_request(params):
         import urlparse
         url = urlparse.urlparse(params.path)
         param = urlparse.parse_qs(url.query)
 
         if 'gocd_profile' in param.keys():
-            gocd = self.get_config()[ 'gocd_profiles' ][ param['gocd_profile'] ]
+            gocd = GitHookEvent.get_config()[ 'gocd_profiles' ][ param['gocd_profile'] ]
 
         elif 'host' in param.keys() and 'port' in param.keys() and 'user' in param.keys() and 'pass' in param.keys():
             gocd = {
