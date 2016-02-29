@@ -100,6 +100,7 @@ class GitHookEvent(object):
             ),
             {"Authorization": "Basic " + base64.encodestring(gocd['user']+":"+gocd['pass']).replace('\n', '')}
         )
+        result = urllib2.urlopen(request)
 
         #import requests
         #requests.post(
