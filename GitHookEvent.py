@@ -13,15 +13,7 @@ class WebhookRequestHandler(BaseHTTPRequestHandler):
         self.send_header('Content-type', 'text/plain')
         self.end_headers()
 
-        import pprint
-        print "git_comit: "
-        pprint.pprint(git_commit)
-
         GitHookEvent.process_request(git_commit)
-
-    def do_GET(self):
-        import pprint
-        pprint.pprint(self.path)
 
     def parse_gitlab_request(self):
         """Parses the incoming request and extracts all possible URLs to the repository in question. Since repos can
@@ -72,6 +64,7 @@ class GitHookEvent(object):
     @staticmethod
     def process_request(req):
         import urlparse
+        import requests
 
         gocd_profiles = GitHookEvent().get_config()[ 'gocd_profiles' ]
 
@@ -95,7 +88,12 @@ class GitHookEvent(object):
             print "Error: gocd profile not defined"
             return
 
-        print "GO.CD API: curl -u '"+gocd['user']+":"+gocd['pass']+"' -X POST --data 'materials["+param['material'][0]+"]="+req['sha']+"&variables[GIT_TAG]="+req['tag']+"' "+gocd['url']+"/go/api/pipelines/"+param['pipeline'][0]+"/schedule"
+        requests.post(
+            gocd['url']+"/go/api/pipelines/"+param['pipeline'][0]+"/schedule",
+            data={"materials["+param['material'][0]+"]": req['sha'], 'variables[GIT_TAG]': req['tag']},
+            auth=(gocd['user'], gocd['pass'])
+        )
+        print req['sha']+"TAG:" +req['tag']+" Pipeline: "+param['pipeline'][0]
 
     def get_default_config_path(selfs):
         return './githookevent.conf.json'
