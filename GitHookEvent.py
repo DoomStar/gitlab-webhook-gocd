@@ -44,7 +44,7 @@ class WebhookRequestHandler(BaseHTTPRequestHandler):
 
             gitlab = {
                 'path': self.path,
-                'sha': data[checkout_sha],
+                'sha': data['checkout_sha'],
                 'tag': data['ref'].split('/',3)[2],
             }
 
