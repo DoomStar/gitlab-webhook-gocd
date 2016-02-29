@@ -76,7 +76,7 @@ class GitHookEvent(object):
         param = urlparse.parse_qs(url.query)
 
         if 'gocd_profile' in param.keys():
-            gocd = GitHookEvent.get_config()[ 'gocd_profiles' ][ param['gocd_profile'] ]
+            gocd = GitHookEvent().get_config()[ 'gocd_profiles' ][ param['gocd_profile'] ]
 
         elif 'host' in param.keys() and 'port' in param.keys() and 'user' in param.keys() and 'pass' in param.keys():
             gocd = {
