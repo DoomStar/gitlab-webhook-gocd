@@ -13,7 +13,9 @@ class WebhookRequestHandler(BaseHTTPRequestHandler):
         self.send_header('Content-type', 'text/plain')
         self.end_headers()
 
-        print "git_comit: "+str(git_commit)
+        import pprint
+        print "git_comit: "
+        pprint.pprint(git_commit)
 
     def parse_gitlab_request(self):
         """Parses the incoming request and extracts all possible URLs to the repository in question. Since repos can
