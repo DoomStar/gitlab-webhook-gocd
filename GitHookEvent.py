@@ -82,7 +82,7 @@ class GitHookEvent(object):
             if param['gocd_profile'] in gocd_profiles.keys():
                 gocd = gocd_profiles[ param['gocd_profile'] ]
             else:
-                print "Error: gocd profile "+param['gocd_profile']+" not found in list of profiles: "+', '.join(gocd_profiles)
+                print "Error: gocd profile "+param['gocd_profile']+" not found in list of profiles: "+', '.join(gocd_profiles.keys())
                 return
 
         elif 'host' in param.keys() and 'port' in param.keys() and 'user' in param.keys() and 'pass' in param.keys():
