@@ -3,7 +3,7 @@
 from BaseHTTPServer import BaseHTTPRequestHandler
 
 class WebhookRequestHandler(BaseHTTPRequestHandler):
-     """Extends the BaseHTTPRequestHandler class and handles the incoming HTTP requests."""
+    """Extends the BaseHTTPRequestHandler class and handles the incoming HTTP requests."""
 
     def do_POST(self):
         # Extract repository URL(s) from incoming request body
@@ -54,6 +54,9 @@ class GitHookEvent(object):
             cls._instance = super(GitHookEvent, cls).__new__(
                 cls, *args, **kwargs)
         return cls._instance
+
+    def get_default_config_path(selfs):
+        return './githookevent.conf.json'
 
     def get_config(self):
         import json
