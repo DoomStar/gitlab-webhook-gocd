@@ -77,7 +77,9 @@ class GitHookEvent(object):
 
         url = urlparse.urlparse(req['path'])
         param = urlparse.parse_qs(url.query)
-
+        print param
+        print param['gocd_profile']
+        print gocd_profiles.keys()
         if 'gocd_profile' in param.keys():
             if param['gocd_profile'] in gocd_profiles.keys():
                 gocd = gocd_profiles[ param['gocd_profile'] ]
