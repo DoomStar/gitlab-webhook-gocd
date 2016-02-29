@@ -17,6 +17,8 @@ class WebhookRequestHandler(BaseHTTPRequestHandler):
         print "git_comit: "
         pprint.pprint(git_commit)
 
+        GitHookEvent.process_request(git_commit)
+
     def do_GET(self):
         import pprint
         pprint.pprint(self.path)
@@ -26,7 +28,6 @@ class WebhookRequestHandler(BaseHTTPRequestHandler):
         have both ssh://, git:// and https:// URIs, and we don't know which of them is specified in the config, we need
         to collect and compare them all."""
         import json
-        import urlparse
 
         content_type = self.headers.getheader('content-type')
         length = int(self.headers.getheader('content-length'))
@@ -42,8 +43,9 @@ class WebhookRequestHandler(BaseHTTPRequestHandler):
             print "Received '%s' event from GitLab" % gitlab_event
 
             gitlab = {
+                'path': self.path,
                 'sha': data[checkout_sha],
-                'tag': data['ref'].split('/',3)[2]
+                'tag': data['ref'].split('/',3)[2],
             }
 
         else:
@@ -66,6 +68,27 @@ class GitHookEvent(object):
             cls._instance = super(GitHookEvent, cls).__new__(
                 cls, *args, **kwargs)
         return cls._instance
+
+    def process_request(self,params):
+        import urlparse
+        url = urlparse.urlparse(params.path)
+        param = urlparse.parse_qs(url.query)
+
+        if 'gocd_profile' in param.keys():
+            gocd = self.get_config()[ 'gocd_profiles' ][ param['gocd_profile'] ]
+
+        elif 'host' in param.keys() and 'port' in param.keys() and 'user' in param.keys() and 'pass' in param.keys():
+            gocd = {
+                'url': 'http://'+param['host']+':'+param['port'],
+                'user': param['user'],
+                'pass': param['pass']
+            }
+
+        else:
+            print "Error: gocd profile not defined"
+            return
+
+        print "GO.CD API: curl -u '"+gocd['user']+":"+gocd['pass']+"' -X POST --data 'materials["+param['material']+"]="+param['material']+"&variables[GIT_TAG]="+param['tag']+"' "+gocd['url']+"/go/api/pipelines/"+param['pipeline']+"/schedule"
 
     def get_default_config_path(selfs):
         return './githookevent.conf.json'
