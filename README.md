@@ -17,6 +17,7 @@ Parameters
 
 example1:
 http://buildsrv.nct:8001/tag/?pipeline=test&material=git_test&gocd_profile=profile1
+
 example2:
 http://buildsrv.nct:8001/tag/?pipeline=test&material=git_test&gocd_user=all&gocd_pass=all&gocd_host=buildsrv.nct&gocd_port=8153
 
