@@ -19,7 +19,7 @@ class WebhookRequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         import pprint
-        pprint.pprint(self.headers)
+        pprint.pprint(self.path)
 
     def parse_gitlab_request(self):
         """Parses the incoming request and extracts all possible URLs to the repository in question. Since repos can
