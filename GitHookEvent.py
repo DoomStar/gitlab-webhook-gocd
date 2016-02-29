@@ -55,6 +55,9 @@ class GitHookEvent(object):
                 cls, *args, **kwargs)
         return cls._instance
 
+    def get_default_config_path(selfs):
+        return './githookevent.conf.json'
+
     def get_config(self):
         import json
         import sys
