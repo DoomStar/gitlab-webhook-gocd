@@ -1,0 +1,14 @@
+{
+  "pidfilepath": "/var/run/githookevent/githookevent.pid",
+  "host": "0.0.0.0",
+  "port": 8001,
+  "gocd_profiles": [
+    {
+      "profile1": {
+        "url": "http://buildsrv.nct:8153",
+        "user": "all",
+        "pass": "all"
+      }
+    }
+  ]
+}
