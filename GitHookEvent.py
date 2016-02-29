@@ -70,13 +70,17 @@ class GitHookEvent(object):
         return cls._instance
 
     @staticmethod
-    def process_request(params):
+    def process_request(req):
         import urlparse
-        url = urlparse.urlparse(params['path'])
+
+        gocd_profiles = GitHookEvent().get_config()[ 'gocd_profiles' ]
+
+        url = urlparse.urlparse(req['path'])
         param = urlparse.parse_qs(url.query)
 
         if 'gocd_profile' in param.keys():
-            gocd = GitHookEvent().get_config()[ 'gocd_profiles' ][ param['gocd_profile'] ]
+            if param['gocd_profile'] in gocd_profiles.keys():
+                gocd = gocd_profiles[ param['gocd_profile'] ]
 
         elif 'host' in param.keys() and 'port' in param.keys() and 'user' in param.keys() and 'pass' in param.keys():
             gocd = {
@@ -89,7 +93,7 @@ class GitHookEvent(object):
             print "Error: gocd profile not defined"
             return
 
-        print "GO.CD API: curl -u '"+gocd['user']+":"+gocd['pass']+"' -X POST --data 'materials["+param['material']+"]="+param['material']+"&variables[GIT_TAG]="+param['tag']+"' "+gocd['url']+"/go/api/pipelines/"+param['pipeline']+"/schedule"
+        print "GO.CD API: curl -u '"+gocd['user']+":"+gocd['pass']+"' -X POST --data 'materials["+param['material']+"]="+req['sha']+"&variables[GIT_TAG]="+req['tag']+"' "+gocd['url']+"/go/api/pipelines/"+param['pipeline']+"/schedule"
 
     def get_default_config_path(selfs):
         return './githookevent.conf.json'
