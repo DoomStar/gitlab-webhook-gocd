@@ -320,10 +320,10 @@ class GitHookEvent(object):
         self.get_config()
 
         if self.daemon:
-            print 'Starting Git Auto Deploy in daemon mode'
+            print 'Starting Git Hook Event in daemon mode'
             GitHookEvent.create_daemon()
         else:
-            print 'Git Auto Deploy started'
+            print 'Git Hook Event started'
 
         self.create_pid_file()
 
