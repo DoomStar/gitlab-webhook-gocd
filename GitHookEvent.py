@@ -112,7 +112,10 @@ class GitHookEvent(object):
         print "sha: "+req['sha']+' TAG: "' +req['tag']+'" Pipeline: '+param['pipeline'][0]
 
     def get_default_config_path(selfs):
-        return './githookevent.conf.json'
+        import os
+        __location__ = os.path.realpath(
+                os.path.join(os.getcwd(), os.path.dirname(__file__)))
+        return os.path.join(__location__, 'githookevent.conf.json')
 
     def get_config(self):
         import json
@@ -307,7 +310,7 @@ class GitHookEvent(object):
         if '--config' in argv:
             pos = argv.index('--config')
             if len(argv) > pos + 1:
-                self.config_path = os.path.realpath(argv[argv.index('--config') + 1])
+                self.config_path = argv[argv.index('--config') + 1]
                 print 'Using custom configuration file \'%s\'' % self.config_path
 
         # Initialize config
