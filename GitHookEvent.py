@@ -81,6 +81,7 @@ class GitHookEvent(object):
 
         if 'tag_filter' in param.keys() and param['tag_filter'][0] not in req['tag']:
             print "Info: tag "+req['tag']+" is not matched to filter "+param['tag_filter'][0]
+            return
 
         elif 'host' in param.keys() and 'port' in param.keys() and 'user' in param.keys() and 'pass' in param.keys():
             gocd = {
