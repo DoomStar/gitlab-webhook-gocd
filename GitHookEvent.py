@@ -79,6 +79,9 @@ class GitHookEvent(object):
                 print "Error: gocd profile "+param['gocd_profile'][0]+" not found in list of profiles: "+', '.join(gocd_profiles.keys())
                 return
 
+        if 'tag_filter' in param.keys() and param['tag_filter'][0] not in req['tag']:
+            print "Info: tag "+req['tag']+" is not matched to filter "+param['tag_filter'][0]
+
         elif 'host' in param.keys() and 'port' in param.keys() and 'user' in param.keys() and 'pass' in param.keys():
             gocd = {
                 'url': 'http://'+param['host'][0]+':'+param['port'][0],
